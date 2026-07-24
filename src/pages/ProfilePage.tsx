@@ -107,7 +107,7 @@ export default function ProfilePage() {
             className="input resize-y"
           />
           <div className="mt-1 text-right text-xs text-gray-400">
-            {(form.notes ?? '').length}/500
+            还可输入 {500 - (form.notes ?? '').length} 字
           </div>
         </div>
 

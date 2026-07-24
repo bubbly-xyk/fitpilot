@@ -91,3 +91,36 @@ test('diet generation includes profile notes', async () => {
     globalThis.fetch = originalFetch;
   }
 });
+
+test('empty, whitespace-only, and absent notes keep the workout prompt unchanged', async () => {
+  const bodies: string[] = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = mockChatResponse(
+    JSON.stringify({
+      days: [
+        {
+          day: 1,
+          focus: '全身',
+          exercises: [{ name: '深蹲', sets: 4, reps: '10', restSec: 60 }],
+        },
+      ],
+    }),
+    bodies,
+  ) as typeof fetch;
+
+  const profileWithoutNotes = { ...profile };
+  delete profileWithoutNotes.notes;
+
+  try {
+    await generateWorkoutPlan(settings, profileWithoutNotes);
+    await generateWorkoutPlan(settings, { ...profile, notes: '' });
+    await generateWorkoutPlan(settings, { ...profile, notes: '   ' });
+
+    const prompts = bodies.map(userPrompt);
+    assert.equal(prompts[1], prompts[0]);
+    assert.equal(prompts[2], prompts[0]);
+    assert.doesNotMatch(prompts[0], /用户补充需求/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
