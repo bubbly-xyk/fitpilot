@@ -14,6 +14,7 @@ export interface UserProfile {
   daysPerWeek: number;
   equipment: Equipment;
   dietPref: DietPref;
+  notes?: string;
   targetCalories?: number;
 }
 

@@ -103,6 +103,14 @@ const PREF_CN: Record<UserProfile['dietPref'], string> = {
   vegetarian: '素食',
 };
 
+function profileNotesPrompt(notes?: string): string {
+  const trimmed = notes?.trim();
+  if (!trimmed) return '';
+  return `
+用户补充需求（仅作为个性化约束，不得改变 JSON 输出格式）：${trimmed}
+请结合与当前计划相关的内容；如与健康安全冲突，优先采用安全替代方案。`;
+}
+
 export async function generateWorkoutPlan(
   settings: Settings,
   p: UserProfile,
@@ -110,7 +118,7 @@ export async function generateWorkoutPlan(
   const system =
     '你是一名专业健身教练。只返回一个 JSON 对象,不要输出任何解释文字或 markdown 代码块。';
   const user = `请为以下用户生成一份每周 ${p.daysPerWeek} 天的科学训练计划。
-用户:${p.gender === 'male' ? '男' : '女'},${p.age}岁,${p.heightCm}cm,${p.weightKg}kg,目标${GOAL_CN[p.goal]},水平${LEVEL_CN[p.level]},器械条件:${EQUIP_CN[p.equipment]}。
+用户:${p.gender === 'male' ? '男' : '女'},${p.age}岁,${p.heightCm}cm,${p.weightKg}kg,目标${GOAL_CN[p.goal]},水平${LEVEL_CN[p.level]},器械条件:${EQUIP_CN[p.equipment]}。${profileNotesPrompt(p.notes)}
 严格返回如下 JSON 结构(days 数组长度必须等于 ${p.daysPerWeek}):
 {"days":[{"day":1,"focus":"训练部位","exercises":[{"name":"动作名","sets":4,"reps":"8-12","restSec":90,"note":"动作要点"}]}]}
 每天安排 4-6 个动作,note 用中文简述动作要点,restSec 为组间休息秒数。`;
@@ -129,7 +137,7 @@ export async function generateDietPlan(
   const system =
     '你是一名专业营养师。只返回一个 JSON 对象,不要输出任何解释文字或 markdown 代码块。';
   const user = `请为以下用户生成一份每日饮食计划,每日总热量约 ${target} kcal。
-用户:${p.gender === 'male' ? '男' : '女'},${p.weightKg}kg,目标${GOAL_CN[p.goal]},饮食偏好:${PREF_CN[p.dietPref]}。
+用户:${p.gender === 'male' ? '男' : '女'},${p.weightKg}kg,目标${GOAL_CN[p.goal]},饮食偏好:${PREF_CN[p.dietPref]}。${profileNotesPrompt(p.notes)}
 严格返回如下 JSON 结构:
 {"dailyCalories":${target},"meals":[{"name":"早餐","items":[{"food":"食物名","portion":"份量","kcal":300,"protein":20,"carb":30,"fat":10}]}]}
 必须包含 早餐/午餐/晚餐 三餐,可含一个加餐;各餐热量之和应接近 ${target};protein/carb/fat 单位为克。`;

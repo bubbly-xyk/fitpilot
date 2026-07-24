@@ -15,6 +15,7 @@ const DEFAULT_PROFILE: UserProfile = {
   daysPerWeek: 4,
   equipment: 'dumbbell',
   dietPref: 'none',
+  notes: '',
 };
 
 export default function ProfilePage() {
@@ -90,6 +91,24 @@ export default function ProfilePage() {
               <option value="vegetarian">素食</option>
             </select>
           </Field>
+        </div>
+
+        <div className="mt-4">
+          <label htmlFor="profile-notes" className="block text-sm font-medium text-gray-600 mb-1">
+            其他健身需求 / 备注
+          </label>
+          <textarea
+            id="profile-notes"
+            value={form.notes ?? ''}
+            onChange={(event) => upd('notes', event.target.value)}
+            maxLength={500}
+            rows={4}
+            placeholder="例如：膝盖不适、只能晨练、希望加强背部、忌口或其他需要 AI 制定计划时考虑的情况"
+            className="input resize-y"
+          />
+          <div className="mt-1 text-right text-xs text-gray-400">
+            {(form.notes ?? '').length}/500
+          </div>
         </div>
 
         <div className="mt-4 flex items-center gap-4">
