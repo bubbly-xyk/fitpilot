@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.auth.router import create_auth_router
 from app.core.errors import (
     ApiProblem,
     api_problem_handler,
@@ -42,6 +43,7 @@ def create_app() -> FastAPI:
     async def liveness() -> dict[str, str]:
         return {"status": "ok"}
 
+    app.include_router(create_auth_router())
     return app
 
 
