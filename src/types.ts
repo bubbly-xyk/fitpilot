@@ -71,14 +71,3 @@ export interface BodyMetric {
   date: string; // YYYY-MM-DD
   weightKg: number;
 }
-
-export interface Settings {
-  apiKey: string;
-  baseURL: string;
-  model: string;
-  // 视觉模型(拍照识别专用)。留空则复用上面的文本模型配置。
-  // 注意:DeepSeek 无视觉模型,拍照识别需单独配一个支持视觉的模型(如智谱 GLM-4V)。
-  visionApiKey?: string;
-  visionBaseURL?: string;
-  visionModel?: string;
-}

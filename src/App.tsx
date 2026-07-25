@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Nav from './components/Nav';
 import type { TabKey } from './components/navConfig';
@@ -9,9 +9,30 @@ import PhotoPage from './pages/PhotoPage';
 import ExercisePage from './pages/ExercisePage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
+import LoginPage from './pages/LoginPage';
+import { AUTH_REQUIRED_EVENT, getSession } from './lib/api';
 
 function App() {
   const [tab, setTab] = useState<TabKey>('dashboard');
+  const [auth, setAuth] = useState<
+    'checking' | 'authenticated' | 'unauthenticated'
+  >('checking');
+
+  useEffect(() => {
+    const requireAuth = () => setAuth('unauthenticated');
+    window.addEventListener(AUTH_REQUIRED_EVENT, requireAuth);
+    void getSession()
+      .then(() => setAuth('authenticated'))
+      .catch(() => setAuth('unauthenticated'));
+    return () => window.removeEventListener(AUTH_REQUIRED_EVENT, requireAuth);
+  }, []);
+
+  if (auth === 'checking') {
+    return <div className="min-h-dvh grid place-items-center">正在连接 FitPilot...</div>;
+  }
+  if (auth === 'unauthenticated') {
+    return <LoginPage onSuccess={() => setAuth('authenticated')} />;
+  }
 
   return (
     <div className="min-h-dvh lg:flex">
