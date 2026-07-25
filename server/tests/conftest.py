@@ -10,6 +10,9 @@ TEST_ENV = {
     "MODEL_API_KEY": "test-model-api-key",
     "MODEL_BASE_URL": "https://model.example/v1",
     "MODEL_NAME": "test-model",
+    "VISION_MODEL_API_KEY": "test-vision-model-api-key",
+    "VISION_MODEL_BASE_URL": "https://vision-model.example/v1",
+    "VISION_MODEL_NAME": "test-vision-model",
     "DEMO_ACCESS_PASSWORD": "d" * 32,
     "SESSION_SECRET": "s" * 32,
 }

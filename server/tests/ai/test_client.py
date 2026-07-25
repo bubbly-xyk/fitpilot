@@ -12,6 +12,9 @@ def settings(**overrides: object) -> Settings:
         "model_api_key": "server-only-key",
         "model_base_url": "https://provider.example/v1",
         "model_name": "server-model",
+        "vision_model_api_key": None,
+        "vision_model_base_url": None,
+        "vision_model_name": None,
         "demo_access_password": "d" * 32,
         "session_secret": "s" * 32,
     }
