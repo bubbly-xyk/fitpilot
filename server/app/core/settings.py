@@ -1,13 +1,16 @@
 from functools import lru_cache
+from pathlib import Path
 from typing import Literal, Self
 
 from pydantic import AnyHttpUrl, Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+SERVER_ENV = Path(__file__).resolve().parents[2] / ".env"
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=SERVER_ENV,
         env_file_encoding="utf-8",
         env_ignore_empty=True,
         extra="ignore",

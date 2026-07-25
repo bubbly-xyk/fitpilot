@@ -63,12 +63,13 @@ def create_auth_router() -> APIRouter:
     async def logout(
         response: Response,
         claims: Annotated[SessionClaims, Depends(require_session)],
+        settings: Annotated[Settings, Depends(get_settings)],
     ) -> None:
         del claims
         response.delete_cookie(
             SESSION_COOKIE_NAME,
             path="/api",
-            secure=False,
+            secure=settings.app_env == "production",
             httponly=True,
             samesite="strict",
         )

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import type {
   UserProfile,
@@ -28,6 +28,10 @@ interface AppContextValue {
 const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
+  useEffect(() => {
+    storage.remove('settings');
+  }, []);
+
   const [profile, setProfileState] = useState<UserProfile | null>(() =>
     storage.get<UserProfile>('profile'),
   );
