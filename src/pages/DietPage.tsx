@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useApp } from '../store';
 import { generateDietPlan } from '../lib/llm';
-import { sampleDiet } from '../lib/sampleData';
-import { calcTargetCalories } from '../lib/tdee';
 import type { Meal } from '../types';
 import { Card, PageTitle, Spinner } from '../components/ui';
 
@@ -20,7 +18,7 @@ function mealTotals(meals: Meal[]) {
 }
 
 export default function DietPage() {
-  const { profile, settings, dietPlan, setDietPlan } = useApp();
+  const { profile, dietPlan, setDietPlan } = useApp();
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState('');
 
@@ -32,11 +30,10 @@ export default function DietPage() {
     setLoading(true);
     setNotice('');
     try {
-      const plan = await generateDietPlan(settings, profile);
+      const plan = await generateDietPlan(profile);
       setDietPlan(plan);
     } catch (e) {
-      setDietPlan(sampleDiet(profile.targetCalories ?? calcTargetCalories(profile)));
-      setNotice('AI 调用失败,已用示例餐单兜底 — ' + (e as Error).message);
+      setNotice('生成失败：' + (e as Error).message);
     } finally {
       setLoading(false);
     }

@@ -41,7 +41,7 @@ function compress(file: File): Promise<string> {
 }
 
 export default function PhotoPage() {
-  const { settings, addFoodLog } = useApp();
+  const { addFoodLog } = useApp();
   const [preview, setPreview] = useState('');
   const [items, setItems] = useState<FoodItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -56,7 +56,7 @@ export default function PhotoPage() {
       const dataUrl = await compress(file);
       setPreview(dataUrl);
       setLoading(true);
-      const result = await recognizeFood(settings, dataUrl);
+      const result = await recognizeFood(dataUrl);
       if (result.length === 0) {
         setNotice('未识别到食物,可手动添加一行');
       }

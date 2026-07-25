@@ -1,0 +1,6 @@
+.env
+server/.env
+server/.venv
+.worktrees
+node_modules
+dist

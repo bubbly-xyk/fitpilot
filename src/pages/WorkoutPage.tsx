@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { useApp } from '../store';
 import { generateWorkoutPlan } from '../lib/llm';
-import { sampleWorkout } from '../lib/sampleData';
 import { Card, PageTitle, Spinner } from '../components/ui';
 
 export default function WorkoutPage() {
-  const { profile, settings, workoutPlan, setWorkoutPlan } = useApp();
+  const { profile, workoutPlan, setWorkoutPlan } = useApp();
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState('');
 
@@ -17,11 +16,10 @@ export default function WorkoutPage() {
     setLoading(true);
     setNotice('');
     try {
-      const plan = await generateWorkoutPlan(settings, profile);
+      const plan = await generateWorkoutPlan(profile);
       setWorkoutPlan(plan);
     } catch (e) {
-      setWorkoutPlan(sampleWorkout(profile.daysPerWeek));
-      setNotice('AI 调用失败,已用示例计划兜底 — ' + (e as Error).message);
+      setNotice('生成失败：' + (e as Error).message);
     } finally {
       setLoading(false);
     }

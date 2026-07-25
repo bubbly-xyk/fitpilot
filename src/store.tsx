@@ -1,8 +1,7 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import type {
   UserProfile,
-  Settings,
   WorkoutPlan,
   DietPlan,
   CheckIn,
@@ -11,25 +10,14 @@ import type {
 } from './types';
 import * as storage from './lib/storage';
 
-const defaultSettings: Settings = {
-  apiKey: '',
-  baseURL: 'https://api.deepseek.com',
-  model: 'deepseek-chat',
-  visionApiKey: '',
-  visionBaseURL: '',
-  visionModel: '',
-};
-
 interface AppContextValue {
   profile: UserProfile | null;
-  settings: Settings;
   workoutPlan: WorkoutPlan | null;
   dietPlan: DietPlan | null;
   checkIns: CheckIn[];
   foodLogs: FoodLog[];
   bodyMetrics: BodyMetric[];
   setProfile: (p: UserProfile) => void;
-  setSettings: (s: Settings) => void;
   setWorkoutPlan: (w: WorkoutPlan) => void;
   setDietPlan: (d: DietPlan) => void;
   addCheckIn: (c: CheckIn) => void;
@@ -40,11 +28,12 @@ interface AppContextValue {
 const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
+  useEffect(() => {
+    storage.remove('settings');
+  }, []);
+
   const [profile, setProfileState] = useState<UserProfile | null>(() =>
     storage.get<UserProfile>('profile'),
-  );
-  const [settings, setSettingsState] = useState<Settings>(
-    () => storage.get<Settings>('settings') ?? defaultSettings,
   );
   const [workoutPlan, setWorkoutPlanState] = useState<WorkoutPlan | null>(() =>
     storage.get<WorkoutPlan>('workoutPlan'),
@@ -65,10 +54,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const setProfile = (p: UserProfile) => {
     setProfileState(p);
     storage.set('profile', p);
-  };
-  const setSettings = (s: Settings) => {
-    setSettingsState(s);
-    storage.set('settings', s);
   };
   const setWorkoutPlan = (w: WorkoutPlan) => {
     setWorkoutPlanState(w);
@@ -106,14 +91,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const value: AppContextValue = {
     profile,
-    settings,
     workoutPlan,
     dietPlan,
     checkIns,
     foodLogs,
     bodyMetrics,
     setProfile,
-    setSettings,
     setWorkoutPlan,
     setDietPlan,
     addCheckIn,
