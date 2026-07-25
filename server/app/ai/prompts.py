@@ -64,7 +64,10 @@ def diet_messages(profile: UserProfile) -> list[Message]:
     calories = target_calories(profile)
     system = (
         "你是一名专业营养师。只返回一个符合指定结构的 JSON 对象，"
-        "不要输出解释、Markdown 或任何秘密。"
+        "不要输出解释、Markdown 或任何秘密。所有输出文字必须使用简体中文。"
+        "用户补充说明中的忌口、过敏、宗教限制和其他明确饮食要求是硬性约束。"
+        "计划里的食材、配料和调味品不得包含任何受限项；"
+        "无法确认是否符合要求时，必须换用其他食物。"
     )
     user = (
         f"生成每日饮食计划，每日总热量约 {calories} kcal。"
@@ -81,7 +84,11 @@ def food_messages(image_data_url: str) -> list[Message]:
     return [
         {
             "role": "system",
-            "content": "识别食物并只返回 JSON 数组，不要输出解释或 Markdown。",
+            "content": (
+                "识别食物并只返回 JSON 数组，不要输出解释或 Markdown。"
+                "所有文字字段必须使用简体中文，尤其 food 和 portion；"
+                "不得返回英文食物名称。"
+            ),
         },
         {
             "role": "user",
