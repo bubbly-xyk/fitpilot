@@ -1,5 +1,5 @@
 import logging
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Collection
 from time import perf_counter
 from typing import Any, cast
 from uuid import uuid4
@@ -18,11 +18,11 @@ class RequestContextMiddleware:
         self,
         app: ASGIApp,
         *,
-        allowed_origin: str,
+        allowed_origins: Collection[str],
         max_request_bytes: int = MAX_REQUEST_BYTES,
     ) -> None:
         self.app = app
-        self.allowed_origin = allowed_origin
+        self.allowed_origins = frozenset(allowed_origins)
         self.max_request_bytes = max_request_bytes
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
@@ -51,7 +51,7 @@ class RequestContextMiddleware:
         if (
             scope["method"] == "POST"
             and scope["path"].startswith("/api/")
-            and headers.get("origin") != self.allowed_origin
+            and headers.get("origin") not in self.allowed_origins
         ):
             await _send_problem(
                 scope,

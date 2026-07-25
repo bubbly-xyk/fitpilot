@@ -56,3 +56,13 @@ Set-Location server
 .\.venv\Scripts\python.exe -m ruff check .
 .\.venv\Scripts\python.exe -m mypy app
 ```
+
+## Vercel 预览部署
+
+仓库根目录已经包含 Vite 静态站点和 FastAPI Python Function 的 Vercel 配置。
+部署时在 Vercel 的 Preview 环境配置 `server/.env.example` 中列出的模型变量，
+并额外设置 `APP_ENV=production`、`DEMO_ACCESS_PASSWORD` 和 `SESSION_SECRET`。
+`VERCEL_URL` 与 `VERCEL_BRANCH_URL` 由平台自动注入，后端只接受这些同源地址。
+
+当前演示版的登录限流保存在单个 Function 实例内，只能作为尽力而为的保护；
+如果对公网长期开放，应改用 Redis 等共享存储实现全局限流。

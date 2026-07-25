@@ -16,7 +16,7 @@ from app.core.errors import (
 )
 from app.core.request_context import RequestContextMiddleware
 from app.core.security_headers import SecurityHeadersMiddleware
-from app.core.settings import get_settings
+from app.core.settings import Settings, get_settings
 
 
 @asynccontextmanager
@@ -26,9 +26,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         yield
 
 
-def create_app() -> FastAPI:
-    settings = get_settings()
-    allowed_origin = str(settings.allowed_origin).rstrip("/")
+def create_app(settings: Settings | None = None) -> FastAPI:
+    resolved_settings = settings or get_settings()
+    allowed_origins = resolved_settings.allowed_origins
     app = FastAPI(
         title="FitPilot Secure Model Proxy",
         version="1.0.0",
@@ -41,19 +41,24 @@ def create_app() -> FastAPI:
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[allowed_origin],
+        allow_origins=allowed_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
     app.add_middleware(
         RequestContextMiddleware,
-        allowed_origin=allowed_origin,
+        allowed_origins=allowed_origins,
     )
     app.add_middleware(
         SecurityHeadersMiddleware,
-        production=settings.app_env == "production",
+        production=resolved_settings.app_env == "production",
     )
+
+    def supplied_settings() -> Settings:
+        return resolved_settings
+
+    app.dependency_overrides[get_settings] = supplied_settings
 
     @app.get("/health/live")
     async def liveness() -> dict[str, str]:
