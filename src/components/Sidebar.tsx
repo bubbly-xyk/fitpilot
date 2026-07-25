@@ -45,12 +45,6 @@ export default function Sidebar({
           );
         })}
       </nav>
-
-      <div className="mt-auto px-2 text-[11px] text-ink-400 leading-relaxed">
-        数据仅存本地浏览器
-        <br />
-        Demo · 2026
-      </div>
     </aside>
   );
 }

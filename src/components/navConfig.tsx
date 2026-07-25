@@ -5,7 +5,6 @@ import {
   Camera,
   BookOpen,
   User,
-  Settings as SettingsIcon,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -15,8 +14,7 @@ export type TabKey =
   | 'diet'
   | 'photo'
   | 'library'
-  | 'profile'
-  | 'settings';
+  | 'profile';
 
 export const NAV_ITEMS: { key: TabKey; label: string; icon: LucideIcon }[] = [
   { key: 'dashboard', label: '仪表盘', icon: LayoutDashboard },
@@ -25,5 +23,4 @@ export const NAV_ITEMS: { key: TabKey; label: string; icon: LucideIcon }[] = [
   { key: 'photo', label: '拍照识别', icon: Camera },
   { key: 'library', label: '动作库', icon: BookOpen },
   { key: 'profile', label: '资料', icon: User },
-  { key: 'settings', label: '设置', icon: SettingsIcon },
 ];

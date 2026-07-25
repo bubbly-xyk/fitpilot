@@ -8,7 +8,6 @@ import DietPage from './pages/DietPage';
 import PhotoPage from './pages/PhotoPage';
 import ExercisePage from './pages/ExercisePage';
 import ProfilePage from './pages/ProfilePage';
-import SettingsPage from './pages/SettingsPage';
 import LoginPage from './pages/LoginPage';
 import { AUTH_REQUIRED_EVENT, getSession } from './lib/api';
 
@@ -46,7 +45,6 @@ function App() {
           {tab === 'photo' && <PhotoPage />}
           {tab === 'library' && <ExercisePage />}
           {tab === 'profile' && <ProfilePage />}
-          {tab === 'settings' && <SettingsPage />}
         </main>
       </div>
     </div>
