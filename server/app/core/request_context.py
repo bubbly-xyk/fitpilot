@@ -1,4 +1,6 @@
+import logging
 from collections.abc import Awaitable, Callable
+from time import perf_counter
 from typing import Any, cast
 from uuid import uuid4
 
@@ -7,6 +9,8 @@ from starlette.responses import JSONResponse
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 MAX_REQUEST_BYTES = 65_536
+MAX_IMAGE_REQUEST_BYTES = 7 * 1024 * 1024
+logger = logging.getLogger("fitpilot.requests")
 
 
 class RequestContextMiddleware:
@@ -33,11 +37,14 @@ class RequestContextMiddleware:
         state = cast(dict[str, Any], scope.setdefault("state", {}))
         state["request_id"] = request_id
         response_started = False
+        status_code = 500
+        started = perf_counter()
 
         async def send_with_request_id(message: Message) -> None:
-            nonlocal response_started
+            nonlocal response_started, status_code
             if message["type"] == "http.response.start":
                 response_started = True
+                status_code = message["status"]
                 MutableHeaders(scope=message)["X-Request-Id"] = request_id
             await send(message)
 
@@ -57,7 +64,12 @@ class RequestContextMiddleware:
             )
             return
 
-        messages, too_large = await self._read_request(receive)
+        request_limit = (
+            MAX_IMAGE_REQUEST_BYTES
+            if scope["path"] == "/api/v1/ai/recognize-food"
+            else self.max_request_bytes
+        )
+        messages, too_large = await self._read_request(receive, request_limit)
         if too_large:
             await _send_problem(
                 scope,
@@ -92,8 +104,23 @@ class RequestContextMiddleware:
                 message="服务器内部错误",
                 request_id=request_id,
             )
+        finally:
+            logger.info(
+                "request_complete",
+                extra={
+                    "request_id": request_id,
+                    "method": scope["method"],
+                    "path": scope["path"],
+                    "status": status_code,
+                    "duration_ms": round((perf_counter() - started) * 1000, 2),
+                },
+            )
 
-    async def _read_request(self, receive: Receive) -> tuple[list[Message], bool]:
+    async def _read_request(
+        self,
+        receive: Receive,
+        limit: int,
+    ) -> tuple[list[Message], bool]:
         messages: list[Message] = []
         byte_count = 0
         while True:
@@ -103,7 +130,7 @@ class RequestContextMiddleware:
                 return messages, False
 
             byte_count += len(message.get("body", b""))
-            if byte_count > self.max_request_bytes:
+            if byte_count > limit:
                 return messages, True
             if not message.get("more_body", False):
                 return messages, False

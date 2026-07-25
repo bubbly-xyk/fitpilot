@@ -1,7 +1,12 @@
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
+import httpx
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.ai.router import create_ai_router
 from app.auth.router import create_auth_router
 from app.core.errors import (
     ApiProblem,
@@ -14,10 +19,21 @@ from app.core.security_headers import SecurityHeadersMiddleware
 from app.core.settings import get_settings
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    async with httpx.AsyncClient(follow_redirects=False) as client:
+        app.state.model_client = client
+        yield
+
+
 def create_app() -> FastAPI:
     settings = get_settings()
     allowed_origin = str(settings.allowed_origin).rstrip("/")
-    app = FastAPI(title="FitPilot Secure Model Proxy", version="1.0.0")
+    app = FastAPI(
+        title="FitPilot Secure Model Proxy",
+        version="1.0.0",
+        lifespan=lifespan,
+    )
 
     app.add_exception_handler(ApiProblem, api_problem_handler)
     app.add_exception_handler(RequestValidationError, validation_error_handler)
@@ -44,6 +60,7 @@ def create_app() -> FastAPI:
         return {"status": "ok"}
 
     app.include_router(create_auth_router())
+    app.include_router(create_ai_router())
     return app
 
 
